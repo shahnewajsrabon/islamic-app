@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
     Home,
@@ -12,10 +12,9 @@ import {
     Menu,
     X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = () => {
-    const [isOpen, setIsOpen] = React.useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const navItems = [
         { to: "/", icon: Home, label: "Dashboard" },

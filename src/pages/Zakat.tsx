@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, DollarSign, Coins, TrendingUp, AlertCircle } from 'lucide-react';
+import { DollarSign, Coins, TrendingUp, AlertCircle } from 'lucide-react';
 
 const ZakatCalculator = () => {
     const [values, setValues] = useState({
@@ -20,7 +20,7 @@ const ZakatCalculator = () => {
 
     const [nisabType, setNisabType] = useState<'gold' | 'silver'>('silver');
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setValues(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
     };

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuran, SurahDetail } from '../hooks/useQuran';
-import { ArrowLeft, PlayCircle } from 'lucide-react';
+import { useQuran, type SurahDetail } from '../hooks/useQuran';
+import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const QuranReader = () => {

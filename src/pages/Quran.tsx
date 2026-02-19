@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useQuran, Surah } from '../hooks/useQuran';
-import { Search, Book } from 'lucide-react';
+import { useState } from 'react';
+import { useQuran } from '../hooks/useQuran';
+import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 

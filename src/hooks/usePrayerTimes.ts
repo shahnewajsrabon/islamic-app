@@ -32,7 +32,7 @@ export const usePrayerTimes = () => {
                         longitude: position.coords.longitude,
                     });
                 },
-                (err) => {
+                (_err) => {
                     setError('Location access denied. Using default location (Mecca).');
                     // Default to Mecca
                     setLocation({ latitude: 21.4225, longitude: 39.8262 });
@@ -66,7 +66,7 @@ export const usePrayerTimes = () => {
                     calculateNextPrayer(response.data.data.timings);
                 }
                 setLoading(false);
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to fetch prayer times.');
                 setLoading(false);
             }

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState, type ElementType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { duaCategories, duas, DuaCategory } from '../data/duaData';
+import { duaCategories, duas } from '../data/duaData';
 import { Sun, Moon, Layout, Car, Home } from 'lucide-react';
 
-const icons: { [key: string]: React.ElementType } = {
+const icons: { [key: string]: ElementType } = {
     Sun, Moon, Layout, Car, Home
 };
 

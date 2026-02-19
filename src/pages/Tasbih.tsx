@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { RotateCcw, Target, Volume2, VolumeX } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
 
 const Tasbih = () => {
     const [count, setCount] = useState(0);

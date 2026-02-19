@@ -22,7 +22,7 @@ export const useQibla = () => {
                 setQiblaDirection(bearing);
                 setLoading(false);
             },
-            (err) => {
+            (_err) => {
                 setError('Unable to retrieve your location');
                 setLoading(false);
             }

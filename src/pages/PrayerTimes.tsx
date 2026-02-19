@@ -1,4 +1,3 @@
-import React from 'react';
 import { usePrayerTimes } from '../hooks/usePrayerTimes';
 import { MapPin, Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';

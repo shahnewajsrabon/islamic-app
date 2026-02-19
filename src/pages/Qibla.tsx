@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQibla } from '../hooks/useQibla';
-import { Compass, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Qibla = () => {
