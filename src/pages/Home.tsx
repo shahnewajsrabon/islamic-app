@@ -1,12 +1,79 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, BookOpen, Heart } from 'lucide-react';
 import { usePrayerTimes } from '../hooks/usePrayerTimes';
 
+// Static content for rotation
+const DAILY_VERSES = [
+    { text: "So remember Me; I will remember you. And be grateful to Me and do not deny Me.", source: "Surah Al-Baqarah [2:152]" },
+    { text: "Indeed, Allah is with the patient.", source: "Surah Al-Baqarah [2:153]" },
+    { text: "Call upon Me; I will respond to you.", source: "Surah Ghafir [40:60]" },
+    { text: "And He found you lost and guided [you].", source: "Surah Ad-Duhaa [93:7]" },
+];
+
+const DAILY_DUAS = [
+    { arabic: "Rabbana atina fid-dunya hasanatan wa fil 'akhirati hasanatan waqina 'adhaban-nar.", meaning: "Our Lord! Give us in this world that which is good and in the Hereafter that which is good." },
+    { arabic: "Rabbi zidni 'ilma.", meaning: "My Lord, increase me in knowledge." },
+    { arabic: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni.", meaning: "O Allah, You are Forgiving and love forgiveness, so forgive me." },
+];
+
 const Home = () => {
-    const { prayers, nextPrayer, loading, location } = usePrayerTimes();
+    const { prayers, nextPrayer, loading, location, hijri } = usePrayerTimes() as any;
     const date = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const currentDate = date.toLocaleDateString('en-US', options);
+
+    // Rotation Logic
+    const dayIndex = date.getDate() % DAILY_VERSES.length;
+    const dailyVerse = DAILY_VERSES[dayIndex];
+    const dailyDua = DAILY_DUAS[date.getDate() % DAILY_DUAS.length];
+
+    // Fast Tracker Logic
+    const [timeToNext, setTimeToNext] = useState<string>('--:--');
+    const [nextEvent, setNextEvent] = useState<string>('Iftar');
+
+    useEffect(() => {
+        if (!prayers) return;
+
+        const updateCountdown = () => {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+
+            const parseTime = (timeStr: string) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            const fajrTime = parseTime(prayers.Fajr);
+            const maghribTime = parseTime(prayers.Maghrib);
+
+            let targetTime = 0;
+            let event = '';
+
+            if (currentTime < fajrTime) {
+                targetTime = fajrTime;
+                event = 'Suhoor Ends';
+            } else if (currentTime < maghribTime) {
+                targetTime = maghribTime;
+                event = 'Iftar';
+            } else {
+                targetTime = fajrTime + 24 * 60; // Next Fajr
+                event = 'Suhoor Ends';
+            }
+
+            let diff = targetTime - currentTime;
+            if (diff < 0) diff += 24 * 60;
+
+            const h = Math.floor(diff / 60);
+            const m = diff % 60;
+            setTimeToNext(`${h}:${m.toString().padStart(2, '0')}`);
+            setNextEvent(event);
+        };
+
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 60000); // Update every minute
+        return () => clearInterval(interval);
+    }, [prayers]);
 
     const heroContent = loading ? (
         <div className="animate-pulse flex flex-col gap-4">
@@ -20,7 +87,13 @@ const Home = () => {
     ) : (
         <div className="relative z-10">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-            <p className="text-emerald-100 mb-6">{currentDate}</p>
+            <p className="text-emerald-100 mb-1">{currentDate}</p>
+            {hijri && (
+                <p className="text-emerald-200 text-sm mb-6 font-medium bg-white/10 inline-block px-3 py-1 rounded-full">
+                    {hijri.day} {hijri.month.en} {hijri.year} AH
+                </p>
+            )}
+            {!hijri && <div className="mb-6"></div>}
 
             <div className="flex flex-col md:flex-row gap-8">
                 <div>
@@ -67,9 +140,9 @@ const Home = () => {
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Daily Verse</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm italic">
-                        "So remember Me; I will remember you. And be grateful to Me and do not deny Me."
+                        "{dailyVerse.text}"
                     </p>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">Surah Al-Baqarah [2:152]</p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{dailyVerse.source}</p>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-md transition-shadow">
@@ -78,9 +151,9 @@ const Home = () => {
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Daily Dua</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        Rabbana atina fid-dunya hasanatan wa fil 'akhirati hasanatan waqina 'adhaban-nar.
+                        {dailyDua.arabic}
                     </p>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium">Our Lord! Give us in this world that which is good and in the Hereafter that which is good.</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium">{dailyDua.meaning}</p>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-md transition-shadow">
@@ -89,8 +162,8 @@ const Home = () => {
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Fast Tracker</h3>
                     <div className="text-center py-2">
-                        <p className="text-3xl font-bold text-gray-800 dark:text-white">12:30</p>
-                        <p className="text-xs text-gray-500">Hours until Iftar</p>
+                        <p className="text-3xl font-bold text-gray-800 dark:text-white">{timeToNext}</p>
+                        <p className="text-xs text-gray-500">Hours until {nextEvent}</p>
                     </div>
                 </div>
             </div>

@@ -8,7 +8,8 @@ export interface PrayerTimes {
     Asr: string;
     Maghrib: string;
     Isha: string;
-    [key: string]: string;
+    hijri?: any;
+    [key: string]: any;
 }
 
 export interface WebLocation {
@@ -62,8 +63,11 @@ export const usePrayerTimes = () => {
                 });
 
                 if (response.data && response.data.data) {
-                    setPrayers(response.data.data.timings);
-                    calculateNextPrayer(response.data.data.timings);
+                    const timings = response.data.data.timings;
+                    // Attach hijri date to the timings object loosely for now, or preferably use a separate state
+                    const hijri = response.data.data.date.hijri;
+                    setPrayers({ ...timings, hijri });
+                    calculateNextPrayer(timings);
                 }
                 setLoading(false);
             } catch (_err) {
@@ -96,5 +100,5 @@ export const usePrayerTimes = () => {
         setNextPrayer('Fajr');
     };
 
-    return { prayers, nextPrayer, loading, error, location };
+    return { prayers, nextPrayer, loading, error, location, hijri: prayers ? (prayers as any).hijri : null };
 };
