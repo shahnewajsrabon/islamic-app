@@ -7,20 +7,50 @@ import { motion } from 'framer-motion';
 const QuranReader = () => {
     const { number } = useParams<{ number: string }>();
     const navigate = useNavigate();
-    const { fetchSurahDetail } = useQuran();
+    const { fetchSurahDetail, toggleBookmark, isBookmarked } = useQuran();
     const [surahData, setSurahData] = useState<SurahDetail[] | null>(null);
     const [loading, setLoading] = useState(true);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audio] = useState(new Audio());
 
     useEffect(() => {
         const loadSurah = async () => {
             if (number) {
                 const data = await fetchSurahDetail(parseInt(number));
                 setSurahData(data);
+
+                // Fetch audio for the first Ayah or full Surah stream if available
+                // For simplicity, we'll try to get the audio for the first ayah to construct a playlist or just play one by one?
+                // Actually, let's just use a public reliable stream for the whole Surah if possible, or build it.
+                // Al Quran Cloud provides audio per Ayah.
+                // Let's implement a simple "Play All" using the first Ayah's logic for now or a different endpoint for full surah.
+                // Better: Use https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/{number}.mp3
+                setAudioUrl(`https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${number}.mp3`);
+
                 setLoading(false);
             }
         };
         loadSurah();
+
+        return () => {
+            audio.pause();
+            audio.src = "";
+        };
     }, [number]);
+
+    const toggleAudio = () => {
+        if (!audioUrl) return;
+
+        if (isPlaying) {
+            audio.pause();
+            setIsPlaying(false);
+        } else {
+            audio.src = audioUrl;
+            audio.play();
+            setIsPlaying(true);
+        }
+    };
 
     if (loading) {
         return (
@@ -55,7 +85,24 @@ const QuranReader = () => {
                     <p className="text-xs text-gray-500">{uthmani?.englishNameTranslation} • {uthmani?.numberOfAyahs} Verses</p>
                 </div>
 
-                <div className="w-10"></div> {/* Spacer for centering */}
+                <div className="flex gap-2">
+                    <button
+                        onClick={toggleAudio}
+                        className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-gray-200 dark:hover:bg-slate-800'}`}
+                    >
+                        {isPlaying ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => number && toggleBookmark(parseInt(number))}
+                        className={`p-2 rounded-full transition-colors ${number && isBookmarked(parseInt(number)) ? 'text-emerald-500' : 'hover:bg-gray-200 dark:hover:bg-slate-800'}`}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={number && isBookmarked(parseInt(number)) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></svg>
+                    </button>
+                </div>
             </div>
 
             {/* Bismillah */}

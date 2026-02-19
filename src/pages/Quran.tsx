@@ -5,13 +5,14 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 const Quran = () => {
-    const { surahs, loading, error } = useQuran();
+    const { surahs, loading, error, isBookmarked } = useQuran();
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
 
     const filteredSurahs = surahs.filter(surah =>
         surah.englishName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         surah.englishNameTranslation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        surah.name.includes(searchTerm) || // Arabic search
         surah.number.toString().includes(searchTerm)
     );
 
@@ -73,14 +74,17 @@ const Quran = () => {
                             <p className="text-xs text-gray-500">{surah.englishNameTranslation}</p>
                         </div>
 
-                        <div className="text-right">
-                            <p className="font-amiri font-bold text-xl text-gray-800 dark:text-white">{surah.name.replace('سورة ', '')}</p>
-                            <p className="text-xs text-gray-400">{surah.numberOfAyahs} Verses</p>
-                        </div>
+                        <p className="font-amiri font-bold text-xl text-gray-800 dark:text-white">{surah.name.replace('سورة ', '')}</p>
+                        <p className="text-xs text-gray-400">{surah.numberOfAyahs} Verses</p>
+                        {isBookmarked(surah.number) && (
+                            <div className="absolute top-2 right-2 text-emerald-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></svg>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
-        </motion.div>
+        </motion.div >
     );
 };
 

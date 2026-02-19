@@ -40,10 +40,46 @@ export interface SurahDetail {
     }
 }
 
+export interface AudioEdition {
+    number: number;
+    audio: string;
+    audioSecondary: string[];
+    text: string;
+    numberInSurah: number;
+    juz: number;
+    manzil: number;
+    page: number;
+    ruku: number;
+    hizbQuarter: number;
+    sajda: boolean;
+}
+
 export const useQuran = () => {
     const [surahs, setSurahs] = useState<Surah[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [bookmarks, setBookmarks] = useState<number[]>([]);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('quran_bookmarks');
+        if (saved) {
+            setBookmarks(JSON.parse(saved));
+        }
+    }, []);
+
+    const toggleBookmark = (surahNumber: number) => {
+        let newBookmarks;
+        if (bookmarks.includes(surahNumber)) {
+            newBookmarks = bookmarks.filter(b => b !== surahNumber);
+        } else {
+            newBookmarks = [...bookmarks, surahNumber];
+        }
+        setBookmarks(newBookmarks);
+        localStorage.setItem('quran_bookmarks', JSON.stringify(newBookmarks));
+    };
+
+    const isBookmarked = (surahNumber: number) => bookmarks.includes(surahNumber);
 
     const fetchSurahs = async () => {
         setLoading(true);
@@ -76,9 +112,22 @@ export const useQuran = () => {
         }
     };
 
+    const fetchSurahAudio = async (number: number): Promise<AudioEdition[] | null> => {
+        try {
+            const response = await axios.get(`http://api.alquran.cloud/v1/surah/${number}/ar.alafasy`);
+            if (response.data && response.data.data && response.data.data.ayahs) {
+                return response.data.data.ayahs;
+            }
+            return null;
+        } catch (err) {
+            console.error("Failed to fetch audio", err);
+            return null;
+        }
+    };
+
     useEffect(() => {
         fetchSurahs();
     }, []);
 
-    return { surahs, fetchSurahDetail, loading, error };
+    return { surahs, fetchSurahDetail, fetchSurahAudio, loading, error, toggleBookmark, isBookmarked, bookmarks };
 };
